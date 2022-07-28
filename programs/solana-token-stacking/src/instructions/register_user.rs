@@ -43,7 +43,7 @@ pub struct RegisterUser<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn register_user(ctx: Context<RegisterUser>, participate_in_trust_program: bool) -> Result<()> {
+pub fn register_user(ctx: Context<RegisterUser>, participate_in_grant_program: bool) -> Result<()> {
     ctx.accounts.user.bump = *ctx.bumps.get("user").ok_or(CustomErrors::EmptyBump)?;
     ctx.accounts.user.bump_fctr_vault =
         *ctx.bumps.get("fctr_vault").ok_or(CustomErrors::EmptyBump)?;
@@ -53,7 +53,7 @@ pub fn register_user(ctx: Context<RegisterUser>, participate_in_trust_program: b
         .ok_or(CustomErrors::EmptyBump)?;
     ctx.accounts.user.bump_receipt = *ctx.bumps.get("receipt").ok_or(CustomErrors::EmptyBump)?;
     ctx.accounts.user.authority = ctx.accounts.authority.key();
-    ctx.accounts.user.trust_program = participate_in_trust_program;
+    ctx.accounts.user.grant_program = participate_in_grant_program;
     ctx.accounts.receipt.authority = ctx.accounts.authority.key();
 
     emit!(UserRegisteredEvent {

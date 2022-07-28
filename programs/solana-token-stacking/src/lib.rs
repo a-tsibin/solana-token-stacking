@@ -21,9 +21,9 @@ pub mod solana_token_stacking {
 
     pub fn register_user(
         ctx: Context<RegisterUser>,
-        participate_in_trust_program: bool,
+        participate_in_grant_program: bool,
     ) -> Result<()> {
-        register_user::register_user(ctx, participate_in_trust_program)
+        register_user::register_user(ctx, participate_in_grant_program)
     }
 
     pub fn start_round(ctx: Context<StartRound>, is_final: bool) -> Result<()> {

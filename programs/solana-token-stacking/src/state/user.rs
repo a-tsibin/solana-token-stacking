@@ -6,7 +6,7 @@ pub struct User {
     pub bump_fctr_vault: u8,
     pub bump_bcdev_vault: u8,
     pub bump_receipt: u8,
-    pub trust_program: bool
+    pub grant_program: bool,
     pub authority: Pubkey,
 }
 
