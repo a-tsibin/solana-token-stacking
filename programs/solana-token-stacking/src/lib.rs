@@ -15,8 +15,12 @@ const BCDEV_DECIMALS: u8 = 18;
 pub mod solana_token_stacking {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>, round_duration: u64) -> Result<()> {
-        initialize::initialize(ctx, round_duration)
+    pub fn initialize(
+        ctx: Context<Initialize>,
+        round_duration: u64,
+        registration_price: u64,
+    ) -> Result<()> {
+        initialize::initialize(ctx, round_duration, registration_price)
     }
 
     pub fn register_user(
@@ -54,7 +58,7 @@ pub mod solana_token_stacking {
         stake::stake(ctx)
     }
 
-    pub fn unstake(ctx: Context<Unstake>) -> Result<()> {
+    pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result<()> {
         unstake::unstake(ctx)
     }
 }

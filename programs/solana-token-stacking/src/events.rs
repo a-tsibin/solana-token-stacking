@@ -43,3 +43,17 @@ pub struct StakeEvent {
 
 #[event]
 pub struct UnstakeEvent {}
+
+#[event]
+pub struct GrantEvent {
+    pub from: Pubkey,
+    pub to: Pubkey,
+    pub amount: u64,
+}
+
+#[event]
+pub struct ClaimEvent {
+    pub from: Pubkey,
+    pub to: Pubkey,
+    pub amount: u64,
+}

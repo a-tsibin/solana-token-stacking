@@ -17,6 +17,7 @@ pub struct BuyTokens<'info> {
     user: Account<'info, User>,
     #[account(mut, seeds = [b"fctr_vault", authority.key().as_ref()], bump = user.bump_fctr_vault)]
     fctr_vault: Account<'info, TokenAccount>,
+    /// CHECK:
     #[account(mut, seeds = [b"sol_vault"], bump = platform.bump_sol_vault)]
     sol_vault: AccountInfo<'info>,
     #[account(mut, seeds = [b"platform"], bump = platform.bump)]
@@ -45,6 +46,7 @@ pub fn buy_tokens(ctx: Context<BuyTokens>, fctr_to_buy: u64) -> Result<()> {
             ctx.accounts.sol_vault.to_account_info(),
         ],
     )?;
+    ctx.accounts.user.total_fctr_amount += fctr_to_buy;
     ctx.accounts.platform.fctr_token_total_amount += fctr_to_buy;
     let signer: &[&[&[u8]]] = &[&[b"platform", &[ctx.accounts.platform.bump]]];
     let cpi_ctx = CpiContext::new_with_signer(

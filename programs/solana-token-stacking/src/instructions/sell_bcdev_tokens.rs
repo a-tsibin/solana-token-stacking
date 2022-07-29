@@ -16,6 +16,7 @@ pub struct SellBcdevTokens<'info> {
     user: Account<'info, User>,
     #[account(mut, seeds = [b"bcdev_vault", authority.key().as_ref()], bump = user.bump_bcdev_vault)]
     bcdev_vault: Account<'info, TokenAccount>,
+    /// CHECK:
     #[account(mut, seeds = [b"sol_vault"], bump = platform.bump_sol_vault)]
     sol_vault: AccountInfo<'info>,
     #[account(mut, seeds = [b"platform"], bump = platform.bump)]

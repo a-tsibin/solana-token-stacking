@@ -7,6 +7,7 @@ use anchor_spl::token::TokenAccount;
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
+    /// CHECK:
     #[account(mut, seeds = [b"sol_vault"], bump = platform.bump_sol_vault)]
     sol_vault: AccountInfo<'info>,
     #[account(mut, seeds = [b"platform"], bump = platform.bump)]

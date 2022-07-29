@@ -6,6 +6,7 @@ use anchor_lang::{
 
 #[derive(Accounts)]
 pub struct AddLiquidity<'info> {
+    /// CHECK:
     #[account(mut, seeds = [b"sol_vault"], bump = platform.bump_sol_vault)]
     sol_vault: AccountInfo<'info>,
     #[account(mut, seeds = [b"platform"], bump = platform.bump)]

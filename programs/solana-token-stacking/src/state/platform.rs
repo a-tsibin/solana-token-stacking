@@ -12,9 +12,10 @@ pub struct Platform {
     pub round_duration: u64,
     pub fctr_token_total_amount: u64,
     pub bcdev_token_total_amount: u64,
+    pub registration_price: u64,
     pub authority: Pubkey,
 }
 
 impl Platform {
-    pub const SPACE: usize = 1 + 1 + 1 + 1 + 1 + 8 + 1 + 8 + 8 + 8 + 32;
+    pub const SPACE: usize = 1 + 1 + 1 + 1 + 1 + 8 + 1 + 8 + 8 + 8 + 8 + 32;
 }

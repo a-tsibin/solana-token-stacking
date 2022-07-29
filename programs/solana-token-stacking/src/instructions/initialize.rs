@@ -17,6 +17,7 @@ pub struct Initialize<'info> {
     platform: Account<'info, Platform>,
     #[account(mut)]
     platform_authority: Signer<'info>,
+    /// CHECK:
     #[account(
         init,
         payer = platform_authority,
@@ -58,7 +59,11 @@ pub struct Initialize<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn initialize(ctx: Context<Initialize>, round_duration: u64) -> Result<()> {
+pub fn initialize(
+    ctx: Context<Initialize>,
+    round_duration: u64,
+    registration_price: u64,
+) -> Result<()> {
     ctx.accounts.platform.bump = *ctx.bumps.get("platform").ok_or(CustomErrors::EmptyBump)?;
     ctx.accounts.platform.bump_sol_vault =
         *ctx.bumps.get("sol_vault").ok_or(CustomErrors::EmptyBump)?;
@@ -72,6 +77,7 @@ pub fn initialize(ctx: Context<Initialize>, round_duration: u64) -> Result<()> {
         *ctx.bumps.get("bcdev_mint").ok_or(CustomErrors::EmptyBump)?;
 
     ctx.accounts.platform.round_duration = round_duration;
+    ctx.accounts.platform.registration_price = registration_price;
 
     emit!(PlatformInitializeEvent {});
 
