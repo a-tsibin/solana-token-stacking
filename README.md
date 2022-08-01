@@ -1,22 +1,22 @@
 # Solana token stacking
-- [x] За SOL можно купить(и докупить) FCTR-token.
-      Минимальная покупка = 10 FTCR
-      Курс 1:109, фиксированный.
-      FCTR можно продать за SOL, по курсу 101:1, тоже фиксированный.
-      Пользователь может продать только все свои FCTR сразу.
-      FCTR-token имеет decimals 12. Mint’ом владеет программа. 
-      BCDEV-token имеет decimals 18. Mint’ом владеет программа.
-      BCDEV можно продать за SOL, по курсу 11:1, курс фиксированный.
-- [x] Только купленные с платформы и/или переданные в “доверительное управление” через платформу токены считаются легитимными. Полученные пользователем другим(и) путём(ями) токены не должны участвовать в стейкинге.
-- [x] Пользователь должен зарегистрироваться на платформе.
-- [x] Предполагается, что регистрация на платформе будет происходить с какой-то недеанонимизирующей верификацией, предотвращающей(затрудняющей) возможность одному юзеру зарегистрировать множество аккаунтов. Со стороны solana-программы это выглядит как ожидание дополнительной подписи в инструкции создания пользователя. (Платная рега?)
-- [x] Пользователь стейкает купленные FCTR на платформе и получает BCDEV-токен в качестве ревардов("APR" зависит от количества доверенных пользователем токенов и количества доверенных пользователем токенов(формула будет дальше)). Стейк происходит сразу всех “легитимных” FCTR-токенов пользователя, без выбора количества.
-- [x] Стейк может повышаться, например в случае, если пользователю кто-то доверил свои FCTR, или пользователь докупил FCTR на платформе.
-- [x] Пользователь анстейкает(всё сразу) и автоматически происходит клейм(отдельной функции клейм нет). В случае, если пользователю кто-то доверил свои FCTR, после анстейка токены автоматически возвращаются владельцам. Пользователь не может сделать анстейк до окончания раунда.
-- [x] Пользователь может перевести(доверить) часть своих FCTR другому пользователю через платформу(он может перевести и просто через spl-token, но тогда у него не будет гарантий возврата, и повышенного "APR" у стейкера).
-- [x] Переведённые токены автоматически стейкаются от имени доверенного лица, если этот юзер уже застейкал свои токены; 
-- [ ] иначе они просто переходят в распоряжение доверенному лицу.
-- [x] Если пользователь участвует в “программе доверия”(как доверитель или как доверенное лицо), то он не может (по-)докупать и продавать FCTR.
-- [x] Овнер(сервер который владеет приватником овнера) может запускать следующий(ие) раунды стейкинга.
-- [x] Овнер платформы может пополнить баланс платформы в любой момент.
-- [x] Овнер может забрать sol с платформы если все пользователи продали свои FCTR и BCDEV токены, или прошло времени более двух раундов, с момента окончания последнего(финального) раунда.
+- [x] You can buy (and buy) FCTR-token for SOL.
+      Minimum purchase = 10 FTCR
+      Course 1:109, fixed.
+      FCTR can be sold for SOL, at a rate of 101:1, also fixed.
+      The user can only sell all of his FCTR at once.
+      FCTR-token has decimals 12. Mint is owned by the program.
+      BCDEV-token has decimals 18. Mint is owned by the program.
+      BCDEV can be sold for SOL, at a rate of 11:1, the rate is fixed.
+- [x] Only tokens purchased from the platform and/or transferred to “trust management” through the platform are considered legitimate. Tokens obtained by the user in another way(s) should not participate in staking.
+- [x] The user must register on the platform.
+- [x] It is assumed that registration on the platform will occur with some kind of non-deanonymizing verification, preventing the ability of one user to register many accounts. From the side of the solana program, this looks like waiting for an additional signature in the user creation instruction. (Paid registration?)
+- [x] The user stakes the purchased FCTR on the platform and receives a BCDEV token as rewards ("APR" depends on the number of tokens trusted by the user and the number of tokens trusted by the user). The stake occurs immediately for all “legitimate” user FCTR tokens, without choosing the amount.
+- [x] The stake can be increased, for example, if someone trusted the user their FCTR, or the user bought additional FCTR on the platform.
+- [x] User unstakes (all at once) and claiming happens automatically. If that someone trusted the user their FCTR, after the unstake, the tokens are automatically returned to the owners. The user cannot unstake until the end of the round.
+- [x] The user can transfer (trust) part of his FCTR to another user through the platform (he can also transfer simply through spl-token, but then he will not have return guarantees, and an increased "APR" for the staker).
+- [x] Transferred tokens are automatically staked on behalf of a trusted person if this user has already staked his tokens.
+- [ ] Otherwise, they simply go to the disposal of a trusted person.
+- [x] If the user participates in the “trust program” (as a trustee or as a confidient), then he cannot (over-)buy and sell FCTR.
+- [x] Owner (the server that owns the owner's private) can start the next round(s) of staking.
+- [x] The platform owner can replenish the platform balance at any time.
+- [x] Owner can withdraw sol from the platform if all users have sold their FCTR and BCDEV tokens, or more than two rounds have passed since the end of the last (final) round.
