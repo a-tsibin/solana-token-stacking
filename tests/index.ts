@@ -31,12 +31,12 @@ describe("token-stacking", () => {
         expect(platform.bumpFctrMint).to.gt(200);
         expect(platform.bumpBcdevMint).to.gt(200);
         expect(platform.bumpFctrTokenVault).to.gt(200);
-        expect(platform.authority).to.eql(ctx.platformAuthority.publicKey);
-        expect(platform.roundDuration).to.eql(roundDuration);
-        expect(platform.registrationPrice).to.eql(registrationPrice);
+        expect(platform.authority.toString()).to.eql(ctx.platformAuthority.publicKey.toString());
+        expect(platform.roundDuration.toNumber()).to.eql(roundDuration);
+        expect(platform.registrationPrice.toNumber()).to.eql(registrationPrice);
         expect(platform.isFinal).to.eql(false);
-        expect(platform.fctrTokenTotalAmount).to.eql(0);
-        expect(platform.bcdevTokenTotalAmount).to.eql(0);
-        expect(platform.roundStart).to.eql(0);
+        expect(platform.fctrTokenTotalAmount.toNumber()).to.eql(0);
+        expect(platform.bcdevTokenTotalAmount.toNumber()).to.eql(0);
+        expect(platform.roundStart.toNumber()).to.eql(0);
     });
 });
