@@ -14,6 +14,7 @@ pub struct Receipt {
     pub apr: f64,
     pub grantors: Vec<GrantorRecord>,
     pub grantors_history: Vec<GrantorHistoryRecord>,
+    pub next_round_grantors: Vec<GrantorRecord>,
     pub authority: Pubkey,
 }
 
@@ -24,6 +25,7 @@ impl Receipt {
         + 8
         + 8
         + 32
+        + (4 + MAX_ACTIVE_GRANTORS * GrantorRecord::SPACE)
         + (4 + MAX_ACTIVE_GRANTORS * GrantorRecord::SPACE)
         + (4 + MAX_GRANTORS_HISTORY * GrantorHistoryRecord::SPACE);
 }

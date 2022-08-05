@@ -19,7 +19,7 @@ export class Context {
     fctrMint: PublicKey;
     bcdevMint: PublicKey;
 
-    stakers: Keypair[];
+    users: Keypair[];
 
     constructor() {
         this.connection = new Connection("http://localhost:8899", "recent");
@@ -28,9 +28,9 @@ export class Context {
 
         this.platformAuthority = new Keypair();
 
-        this.stakers = [];
+        this.users = [];
         for (let i = 0; i < 5; i++) {
-            this.stakers.push(new Keypair());
+            this.users.push(new Keypair());
         }
     }
 
@@ -39,8 +39,8 @@ export class Context {
             this,
             [
                 this.platformAuthority.publicKey,
-            ].concat(this.stakers.map((s) => s.publicKey)),
-            10_000_000
+            ].concat(this.users.map((s) => s.publicKey)),
+            100_000_000
         );
 
         this.platform = await findPDA(
@@ -95,7 +95,17 @@ export class Context {
             ],
             this.program.programId
         );
-        return new TokenAccount(address, this.fctrMint);
+        return new TokenAccount(address, this.bcdevMint);
+    }
+
+    async receipt(authority: PublicKey): Promise<PublicKey> {
+        return await findPDA(
+            [
+                Buffer.from("receipt"),
+                authority.toBuffer(),
+            ],
+            this.program.programId
+        );
     }
 
     async fctrATA(owner: PublicKey): Promise<TokenAccount> {

@@ -15,7 +15,7 @@
 - [x] User unstakes (all at once) and claiming happens automatically. If that someone trusted the user their FCTR, after the unstake, the tokens are automatically returned to the owners. The user cannot unstake until the end of the round.
 - [x] The user can transfer (trust) part of his FCTR to another user through the platform (he can also transfer simply through spl-token, but then he will not have return guarantees, and an increased "APR" for the staker).
 - [x] Transferred tokens are automatically staked on behalf of a trusted person if this user has already staked his tokens.
-- [ ] Otherwise, they simply go to the disposal of a trusted person.
+- [x] Otherwise, they simply go to the disposal of a trusted person.
 - [x] If the user participates in the “trust program” (as a trustee or as a confidient), then he cannot (over-)buy and sell FCTR.
 - [x] Owner (the server that owns the owner's private) can start the next round(s) of staking.
 - [x] The platform owner can replenish the platform balance at any time.

@@ -44,25 +44,28 @@ pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
     if !ctx.accounts.confidant_user.grant_program || !ctx.accounts.user.grant_program {
         return err!(CustomErrors::GrantProgramError);
     }
-    //todo: We can create another list of grantors in receipt to deal with cases,
-    // when new round started, but confidant doesn't unstake previous round
-    // and user want to grant tokens to him.
-    if ctx.accounts.receipt.is_valid && ctx.accounts.receipt.stake_ts < now {
-        return err!(CustomErrors::InvalidReceipt);
-    }
+    let grantors_list = if ctx.accounts.confidant_receipt.stake_ts > now {
+        &mut ctx.accounts.confidant_receipt.grantors
+    } else {
+        &mut ctx.accounts.confidant_receipt.next_round_grantors
+    };
+
     let amount_ratio = ctx.accounts.user.total_fctr_amount as f64
         / ctx.accounts.confidant_user.total_fctr_amount as f64;
-    if ctx
-        .accounts
-        .confidant_receipt
-        .grantors
+    if grantors_list
         .iter()
         .any(|g| g.grantor == ctx.accounts.fctr_vault.key())
-        || ctx.accounts.confidant_receipt.grantors.len() >= 4
+        || grantors_list.len() >= 4
         || (0.5 <= amount_ratio && amount_ratio <= 2.0)
     {
         return err!(CustomErrors::TokenGrantError);
     }
+    grantors_list.push(GrantorRecord {
+        amount,
+        grant_duration: ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration
+            - now,
+        grantor: ctx.accounts.user.key(),
+    });
     if ctx
         .accounts
         .confidant_receipt
@@ -87,12 +90,6 @@ pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
     token::transfer(cpi_ctx, amount)?;
 
     ctx.accounts.confidant_receipt.amount_deposited += amount;
-    ctx.accounts.confidant_receipt.grantors.push(GrantorRecord {
-        amount,
-        grant_duration: ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration
-            - now,
-        grantor: ctx.accounts.user.key(),
-    });
     ctx.accounts
         .confidant_receipt
         .grantors_history

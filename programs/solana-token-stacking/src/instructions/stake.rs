@@ -38,6 +38,8 @@ pub fn stake(ctx: Context<Stake>) -> Result<()> {
     if ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration < now {
         return err!(CustomErrors::NoActiveRound);
     }
+    ctx.accounts.receipt.grantors = ctx.accounts.receipt.next_round_grantors.clone(); //std::mem::swap?
+    ctx.accounts.receipt.next_round_grantors = Vec::new();
 
     let cpi_ctx = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),

@@ -3,7 +3,7 @@ use crate::{
     FCTR_DECIMALS,
 };
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token};
+use anchor_spl::token::{Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
@@ -27,16 +27,6 @@ pub struct Initialize<'info> {
         owner = system_program.key(),
     )]
     sol_vault: AccountInfo<'info>,
-    /// CHECK:
-    #[account(
-        init,
-        payer = platform_authority,
-        seeds = [b"fctr_token_vault"],
-        bump,
-        space = 0,
-        owner = system_program.key(),
-    )]
-    fctr_token_vault: UncheckedAccount<'info>,
     #[account(
         init,
         payer = platform_authority,
@@ -55,6 +45,15 @@ pub struct Initialize<'info> {
         mint::decimals = BCDEV_DECIMALS,
     )]
     bcdev_mint: Account<'info, Mint>,
+    #[account(
+        init,
+        payer = platform_authority,
+        seeds = [b"fctr_token_vault"],
+        bump,
+        token::authority = platform,
+        token::mint = fctr_mint,
+    )]
+    fctr_token_vault: Account<'info, TokenAccount>,
     rent: Sysvar<'info, Rent>,
     token_program: Program<'info, Token>,
     system_program: Program<'info, System>,

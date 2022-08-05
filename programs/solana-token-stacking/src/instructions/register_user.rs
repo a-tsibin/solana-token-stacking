@@ -5,10 +5,34 @@ use anchor_lang::{
     prelude::*,
     solana_program::{program::invoke, system_instruction},
 };
-use anchor_spl::token::TokenAccount;
+use anchor_spl::token::{Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
 pub struct RegisterUser<'info> {
+    #[account(mut, seeds = [b"platform"], bump = platform.bump)]
+    platform: Account<'info, Platform>,
+    #[account(mut, seeds = [b"fctr_mint"], bump = platform.bump_fctr_mint)]
+    fctr_mint: Account<'info, Mint>,
+    #[account(mut, seeds = [b"bcdev_mint"], bump = platform.bump_bcdev_mint)]
+    bcdev_mint: Account<'info, Mint>,
+    #[account(
+        init,
+        payer = authority,
+        seeds = [b"fctr_vault", authority.key().as_ref()],
+        bump,
+        token::authority = platform,
+        token::mint = fctr_mint,
+    )]
+    fctr_vault: Account<'info, TokenAccount>,
+    #[account(
+        init,
+        payer = authority,
+        seeds = [b"bcdev_vault", authority.key().as_ref()],
+        bump,
+        token::authority = platform,
+        token::mint = bcdev_mint,
+    )]
+    bcdev_vault: Account<'info, TokenAccount>,
     #[account(
         init,
         payer = authority,
@@ -17,24 +41,6 @@ pub struct RegisterUser<'info> {
         space = 8 + User::SPACE,
     )]
     user: Account<'info, User>,
-    #[account(
-        init,
-        payer = authority,
-        seeds = [b"fctr_vault", authority.key().as_ref()],
-        bump,
-        space = 0,
-        owner = authority.key(),
-    )]
-    fctr_vault: Account<'info, TokenAccount>,
-    #[account(
-        init,
-        payer = authority,
-        seeds = [b"bcdev_vault", authority.key().as_ref()],
-        bump,
-        space = 0,
-        owner = authority.key(),
-    )]
-    bcdev_vault: Account<'info, TokenAccount>,
     #[account(
         init,
         payer = authority,
@@ -48,8 +54,8 @@ pub struct RegisterUser<'info> {
     /// CHECK:
     #[account(mut, seeds = [b"sol_vault"], bump = platform.bump_sol_vault)]
     sol_vault: AccountInfo<'info>,
-    #[account(mut, seeds = [b"platform"], bump = platform.bump)]
-    platform: Account<'info, Platform>,
+    rent: Sysvar<'info, Rent>,
+    token_program: Program<'info, Token>,
     system_program: Program<'info, System>,
 }
 
