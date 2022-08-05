@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-#[account]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Debug, Default)]
 pub struct GrantorRecord {
     pub amount: u64,
     pub grant_duration: u64,
