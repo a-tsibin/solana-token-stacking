@@ -31,11 +31,10 @@ pub struct GrantTokens<'info> {
     platform_fctr_token_vault: Account<'info, TokenAccount>,
     system_program: Program<'info, System>,
     token_program: Program<'info, Token>,
-    clock: Sysvar<'info, Clock>,
 }
 
 pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
-    let now: u64 = ctx.accounts.clock.unix_timestamp as _;
+    let now: u64 = Clock::get()?.unix_timestamp as _;
     if (ctx.accounts.receipt.authority != ctx.accounts.authority.key())
         || (ctx.accounts.confidant_receipt.authority != ctx.accounts.confidant_authority.key())
     {

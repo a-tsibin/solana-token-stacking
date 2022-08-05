@@ -10,7 +10,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 #[derive(Accounts)]
 pub struct RegisterUser<'info> {
     #[account(mut, seeds = [b"platform"], bump = platform.bump)]
-    platform: Account<'info, Platform>,
+    platform: Box<Account<'info, Platform>>,
     #[account(mut, seeds = [b"fctr_mint"], bump = platform.bump_fctr_mint)]
     fctr_mint: Account<'info, Mint>,
     #[account(mut, seeds = [b"bcdev_mint"], bump = platform.bump_bcdev_mint)]
@@ -20,7 +20,7 @@ pub struct RegisterUser<'info> {
         payer = authority,
         seeds = [b"fctr_vault", authority.key().as_ref()],
         bump,
-        token::authority = platform,
+        token::authority = authority,
         token::mint = fctr_mint,
     )]
     fctr_vault: Account<'info, TokenAccount>,
@@ -29,7 +29,7 @@ pub struct RegisterUser<'info> {
         payer = authority,
         seeds = [b"bcdev_vault", authority.key().as_ref()],
         bump,
-        token::authority = platform,
+        token::authority = authority,
         token::mint = bcdev_mint,
     )]
     bcdev_vault: Account<'info, TokenAccount>,

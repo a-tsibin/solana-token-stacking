@@ -40,7 +40,7 @@ export class Context {
             [
                 this.platformAuthority.publicKey,
             ].concat(this.users.map((s) => s.publicKey)),
-            100_000_000
+            1_500_000_000
         );
 
         this.platform = await findPDA(

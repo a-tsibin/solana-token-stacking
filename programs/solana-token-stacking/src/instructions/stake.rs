@@ -24,11 +24,10 @@ pub struct Stake<'info> {
     platform_fctr_token_vault: Account<'info, TokenAccount>,
     system_program: Program<'info, System>,
     token_program: Program<'info, Token>,
-    clock: Sysvar<'info, Clock>,
 }
 
 pub fn stake(ctx: Context<Stake>) -> Result<()> {
-    let now: u64 = ctx.accounts.clock.unix_timestamp as _;
+    let now: u64 = Clock::get()?.unix_timestamp as _;
     if ctx.accounts.receipt.authority != ctx.accounts.authority.key() {
         return err!(CustomErrors::InvalidReceiptAuthority);
     }

@@ -7,12 +7,11 @@ pub struct StartRound<'info> {
     platform: Account<'info, Platform>,
     #[account(mut, address = platform.authority)]
     authority: Signer<'info>,
-    clock: Sysvar<'info, Clock>,
     system_program: Program<'info, System>,
 }
 
 pub fn start_round(ctx: Context<StartRound>, is_final: bool) -> Result<()> {
-    let now = ctx.accounts.clock.unix_timestamp as _;
+    let now = Clock::get()?.unix_timestamp as _;
     if now < ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration {
         return err!(CustomErrors::RoundAlreadyStarted);
     } else if ctx.accounts.platform.is_final {

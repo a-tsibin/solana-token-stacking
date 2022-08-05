@@ -31,7 +31,6 @@ pub struct ClaimTokens<'info> {
     platform_fctr_token_vault: Account<'info, TokenAccount>,
     system_program: Program<'info, System>,
     token_program: Program<'info, Token>,
-    clock: Sysvar<'info, Clock>,
 }
 
 pub fn claim_tokens(ctx: Context<ClaimTokens>) -> Result<()> {

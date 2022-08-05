@@ -19,12 +19,11 @@ pub struct Withdraw<'info> {
         bump = platform.bump_fctr_token_vault
     )]
     fctr_token_vault: Account<'info, TokenAccount>,
-    clock: Sysvar<'info, Clock>,
     system_program: Program<'info, System>,
 }
 
 pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
-    let now = ctx.accounts.clock.unix_timestamp as _;
+    let now = Clock::get()?.unix_timestamp as _;
     if !check_withdraw_conditions(&ctx.accounts, now) {
         return err!(CustomErrors::WithdrawConditions);
     }

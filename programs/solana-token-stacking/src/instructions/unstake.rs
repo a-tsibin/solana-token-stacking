@@ -29,11 +29,10 @@ pub struct Unstake<'info> {
     bcdev_mint: Account<'info, Mint>,
     system_program: Program<'info, System>,
     token_program: Program<'info, Token>,
-    clock: Sysvar<'info, Clock>,
 }
 
 pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result<()> {
-    let now: u64 = ctx.accounts.clock.unix_timestamp as _;
+    let now: u64 = Clock::get()?.unix_timestamp as _;
     if ctx.accounts.receipt.authority != ctx.accounts.authority.key() {
         return err!(CustomErrors::InvalidReceiptAuthority);
     }

@@ -46,16 +46,14 @@ export async function registerUser(
         )
         .accounts({
             platform: ctx.platform,
-            user: await ctx.user(userAuthority.publicKey),
             fctrMint: ctx.fctrMint,
             bcdevMint: ctx.bcdevMint,
             fctrVault: await ctx.userFctrVault(userAuthority.publicKey),
             bcdevVault: await ctx.userBcdevVault(userAuthority.publicKey),
+            user: await ctx.user(userAuthority.publicKey),
             receipt: await ctx.receipt(userAuthority.publicKey),
             authority: userAuthority.publicKey,
             solVault: ctx.solVault,
-            rent: SYSVAR_RENT_PUBKEY,
-            tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
         })
         .signers([userAuthority])
@@ -91,6 +89,41 @@ export async function buyTokens(
             solVault: ctx.solVault,
             platform: ctx.platform,
             fctrMint: ctx.fctrMint,
+            authority: userAuthority.publicKey,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID
+        })
+        .signers([userAuthority])
+        .rpc();
+}
+
+export async function startRound(
+    ctx: Context,
+    isFinal: boolean
+): Promise<void> {
+    await ctx.program.methods
+        .startRound(isFinal)
+        .accounts({
+            platform: ctx.platform,
+            authority: ctx.platformAuthority.publicKey,
+            systemProgram: SystemProgram.programId
+        })
+        .signers([ctx.platformAuthority])
+        .rpc();
+}
+
+export async function stake(
+    ctx: Context,
+    userAuthority: Keypair
+): Promise<void> {
+    await ctx.program.methods
+        .stake()
+        .accounts({
+            user: await ctx.user(userAuthority.publicKey),
+            receipt: await ctx.receipt(userAuthority.publicKey),
+            fctrVault: await ctx.userFctrVault(userAuthority.publicKey),
+            platform: ctx.platform,
+            platformFctrTokenVault: await ctx.fctrVault(),
             authority: userAuthority.publicKey,
             systemProgram: SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID

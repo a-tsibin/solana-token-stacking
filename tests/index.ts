@@ -4,7 +4,7 @@ import chaiAsPromised from "chai-as-promised";
 import {Context} from "./ctx";
 import {
     addLiquidity, buyTokens,
-    initialize, registerUser
+    initialize, registerUser, stake, startRound
 } from "./token-stacking-api";
 import {transfer} from "./token";
 
@@ -19,7 +19,7 @@ before(async () => {
 describe("token-stacking", () => {
     it("Initialize", async () => {
         const roundDuration = 10;
-        const registrationPrice = 200_000;
+        const registrationPrice = 100_000;
         await initialize(
             ctx,
             roundDuration,
@@ -75,6 +75,7 @@ describe("token-stacking", () => {
     it("Buy tokens", async () => {
         const fctrAmountToBuy = 109;
         const balanceBefore = await ctx.solVaultBalance();
+        const ftcrAmountBefore = (await ctx.program.account.platform.fetch(ctx.platform)).fctrTokenTotalAmount.toNumber();
         const expected_price = 1_000_000_000;
         await buyTokens(
             ctx,
@@ -82,13 +83,21 @@ describe("token-stacking", () => {
             ctx.users[0]
         );
 
-        const user = await ctx.program.account.user.fetch(
-            await ctx.user(ctx.users[0].publicKey)
-        );
-
-        expect(user.totalFctrAmount.toNumber()).to.eql(fctrAmountToBuy);
+        const ftcrAmountAfter = (await ctx.program.account.platform.fetch(ctx.platform)).fctrTokenTotalAmount.toNumber();
 
         const balanceAfter = await ctx.solVaultBalance();
         expect(balanceBefore).to.eql(balanceAfter - expected_price);
+        expect(ftcrAmountAfter - ftcrAmountBefore).to.eql(fctrAmountToBuy);
+
+        const user = await ctx.program.account.user.fetch(
+            await ctx.user(ctx.users[0].publicKey)
+        );
+        const userFtcrAmount = await (await ctx.userFctrVault(user.authority)).amount(ctx);
+        expect(userFtcrAmount).to.eql(fctrAmountToBuy);
+    });
+
+    it("Stake tokens", async () => {
+        await startRound(ctx, false);
+        await stake(ctx, ctx.users[0]);
     });
 });
