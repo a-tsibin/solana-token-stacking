@@ -26,7 +26,7 @@ pub struct GrantTokens<'info> {
     /// CHECK:
     confidant_authority: UncheckedAccount<'info>,
     #[account(mut, seeds = [b"platform"], bump = platform.bump)]
-    platform: Account<'info, Platform>,
+    platform: Box<Account<'info, Platform>>,
     #[account(mut, seeds = [b"fctr_token_vault"], bump = platform.bump_fctr_token_vault)]
     platform_fctr_token_vault: Account<'info, TokenAccount>,
     system_program: Program<'info, System>,
@@ -36,7 +36,7 @@ pub struct GrantTokens<'info> {
 pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
     let now: u64 = Clock::get()?.unix_timestamp as _;
     if (ctx.accounts.receipt.authority != ctx.accounts.authority.key())
-        || (ctx.accounts.confidant_receipt.authority != ctx.accounts.confidant_authority.key())
+        || (ctx.accounts.confidant_receipt.authority != ctx.accounts.confidant_user.authority)
     {
         return err!(CustomErrors::InvalidReceiptAuthority);
     }

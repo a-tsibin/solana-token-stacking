@@ -3,8 +3,8 @@ import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import {Context} from "./ctx";
 import {
-    addLiquidity, buyTokens,
-    initialize, registerUser, sellBcdevTokens, sellFctrTokens, stake, startRound, unstake
+    addLiquidity, buyTokens, grantTokens,
+    initialize, registerUser, sellBcdevTokens, sellFctrTokens, stake, startRound, unstake, withdraw
 } from "./token-stacking-api";
 import {transfer} from "./token";
 import {sleep} from "./utils";
@@ -21,11 +21,7 @@ describe("token-stacking", () => {
     it("Initialize", async () => {
         const roundDuration = 10;
         const registrationPrice = 100_000;
-        await initialize(
-            ctx,
-            roundDuration,
-            registrationPrice
-        );
+        await initialize(ctx, roundDuration, registrationPrice);
 
         const platform = await ctx.program.account.platform.fetch(ctx.platform);
         expect(platform.bump).to.gt(200);
@@ -69,10 +65,7 @@ describe("token-stacking", () => {
     it("Add liquidity", async () => {
         const amount = 100_000;
         const balanceBefore = await ctx.solVaultBalance();
-        await addLiquidity(
-            ctx,
-            amount
-        );
+        await addLiquidity(ctx, amount);
 
         const balanceAfter = await ctx.solVaultBalance();
         expect(balanceBefore).to.eql(balanceAfter - amount);
@@ -83,11 +76,7 @@ describe("token-stacking", () => {
         const balanceBefore = await ctx.solVaultBalance();
         const ftcrAmountBefore = (await ctx.program.account.platform.fetch(ctx.platform)).fctrTokenTotalAmount.toNumber();
         const expectedFctrCount = 1_090_000;
-        await buyTokens(
-            ctx,
-            lamports,
-            ctx.users[0]
-        );
+        await buyTokens(ctx, lamports, ctx.users[0]);
 
         const ftcrAmountAfter = (await ctx.program.account.platform.fetch(ctx.platform)).fctrTokenTotalAmount.toNumber();
 
@@ -131,6 +120,10 @@ describe("token-stacking", () => {
         expect(platform.bcdevTokenTotalAmount.toNumber()).to.eql(userBcdevAmount)
     });
 
+    it("Withdraw failed", async () => {
+        await expect(withdraw(ctx, ctx.platformAuthority)).to.be.rejected;
+    });
+
     it("Sell tokens", async () => {
         const userFctrAmountBefore = await (await ctx.userFctrVault(ctx.users[0].publicKey)).amount(ctx);
         const userBcdevAmountBefore = await (await ctx.userBcdevVault(ctx.users[0].publicKey)).amount(ctx);
@@ -153,5 +146,12 @@ describe("token-stacking", () => {
         platform = await ctx.program.account.platform.fetch(ctx.platform);
         expect(platform.fctrTokenTotalAmount.toNumber()).to.eql(platformFctrAmountBefore.toNumber() - userFctrAmountBefore);
         expect(platform.bcdevTokenTotalAmount.toNumber()).to.eql(platformBcdevAmountBefore.toNumber() - userBcdevAmountBefore);
+    });
+
+    it("Grant tokens", async () => {
+        const lamports = 10;
+        await buyTokens(ctx, lamports, ctx.users[1]);
+
+        await grantTokens(ctx, 10, ctx.users[0].publicKey, ctx.users[1]);
     });
 });

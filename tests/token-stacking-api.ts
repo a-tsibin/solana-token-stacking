@@ -220,3 +220,45 @@ export async function unstake(
         .signers([userAuthority])
         .rpc();
 }
+
+export async function grantTokens(
+    ctx: Context,
+    amount: number,
+    confidantUser: PublicKey,
+    userAuthority: Keypair
+): Promise<void> {
+    await ctx.program.methods
+        .grantTokens(new BN(amount))
+        .accounts({
+            receipt: await ctx.receipt(userAuthority.publicKey),
+            user: await ctx.user(userAuthority.publicKey),
+            fctrVault: await ctx.userFctrVault(userAuthority.publicKey),
+            authority: userAuthority.publicKey,
+            confidantUser: await ctx.user(confidantUser),
+            confidantReceipt: await ctx.receipt(confidantUser),
+            confidantAuthority: confidantUser,
+            platform: ctx.platform,
+            platformFctrTokenVault: await ctx.fctrVault(),
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID
+        })
+        .signers([userAuthority])
+        .rpc();
+}
+
+export async function withdraw(
+    ctx: Context,
+    platformAuthority: Keypair
+): Promise<void> {
+    await ctx.program.methods
+        .withdraw()
+        .accounts({
+            solVault: ctx.solVault,
+            authority: platformAuthority.publicKey,
+            fctrTokenVault: await ctx.fctrVault(),
+            platform: ctx.platform,
+            systemProgram: SystemProgram.programId
+        })
+        .signers([platformAuthority])
+        .rpc();
+}
