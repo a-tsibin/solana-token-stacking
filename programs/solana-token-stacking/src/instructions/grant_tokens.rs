@@ -49,8 +49,8 @@ pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
         &mut ctx.accounts.confidant_receipt.next_round_grantors
     };
 
-    let amount_ratio = ctx.accounts.user.total_fctr_amount as f64
-        / ctx.accounts.confidant_user.total_fctr_amount as f64;
+    let amount_ratio = ctx.accounts.user.user_fctr_amount as f64
+        / ctx.accounts.confidant_user.user_fctr_amount as f64;
     if grantors_list
         .iter()
         .any(|g| g.grantor == ctx.accounts.fctr_vault.key())

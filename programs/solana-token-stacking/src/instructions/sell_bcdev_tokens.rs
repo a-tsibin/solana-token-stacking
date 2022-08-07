@@ -1,13 +1,14 @@
 use crate::{
     events::SellBcdevTokensEvent,
     state::{Platform, User},
+    BCDEV_DECIMALS,
 };
-use anchor_lang::solana_program::native_token::LAMPORTS_PER_SOL;
 use anchor_lang::{
     prelude::*,
     solana_program::{program::invoke_signed, system_instruction},
 };
 use anchor_spl::token;
+use anchor_spl::token::spl_token::native_mint::DECIMALS;
 use anchor_spl::token::{Burn, Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
@@ -30,7 +31,8 @@ pub struct SellBcdevTokens<'info> {
 }
 
 pub fn sell_bcdev_tokens(ctx: Context<SellBcdevTokens>, amount: u64) -> Result<()> {
-    let lamports_to_get = amount * LAMPORTS_PER_SOL / 11;
+    let lamports_to_get =
+        ctx.accounts.bcdev_vault.amount / (11 * 10u64.pow((BCDEV_DECIMALS - DECIMALS) as _));
     invoke_signed(
         &system_instruction::transfer(
             ctx.accounts.sol_vault.key,

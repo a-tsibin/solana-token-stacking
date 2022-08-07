@@ -7,7 +7,7 @@ pub struct User {
     pub bump_bcdev_vault: u8,
     pub bump_receipt: u8,
     pub grant_program: bool,
-    pub total_fctr_amount: u64,
+    pub user_fctr_amount: u64,
     pub authority: Pubkey,
 }
 

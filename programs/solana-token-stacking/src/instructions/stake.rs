@@ -48,13 +48,13 @@ pub fn stake(ctx: Context<Stake>) -> Result<()> {
             authority: ctx.accounts.authority.to_account_info(),
         },
     );
-    token::transfer(cpi_ctx, ctx.accounts.user.total_fctr_amount)?;
+    token::transfer(cpi_ctx, ctx.accounts.user.user_fctr_amount)?;
 
     ctx.accounts.receipt.is_valid = true;
     ctx.accounts.receipt.stake_ts = now;
     ctx.accounts.receipt.stake_duration =
         ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration - now;
-    ctx.accounts.receipt.amount_deposited = ctx.accounts.user.total_fctr_amount;
+    ctx.accounts.receipt.amount_deposited = ctx.accounts.user.user_fctr_amount;
     ctx.accounts.receipt.grantors = Vec::new();
 
     emit!(StakeEvent {

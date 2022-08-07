@@ -1,13 +1,14 @@
 use crate::{
     events::SellFctrTokensEvent,
     state::{Platform, User},
+    FCTR_DECIMALS,
 };
-use anchor_lang::solana_program::native_token::LAMPORTS_PER_SOL;
 use anchor_lang::{
     prelude::*,
     solana_program::{program::invoke_signed, system_instruction},
 };
 use anchor_spl::token;
+use anchor_spl::token::spl_token::native_mint::DECIMALS;
 use anchor_spl::token::{Burn, Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
@@ -30,7 +31,8 @@ pub struct SellFctrTokens<'info> {
 }
 
 pub fn sell_fctr_tokens(ctx: Context<SellFctrTokens>) -> Result<()> {
-    let lamports_to_get = ctx.accounts.fctr_vault.amount * LAMPORTS_PER_SOL / 101;
+    let lamports_to_get =
+        ctx.accounts.fctr_vault.amount / (101 * 10u64.pow((FCTR_DECIMALS - DECIMALS) as _));
     invoke_signed(
         &system_instruction::transfer(
             ctx.accounts.sol_vault.key,
@@ -54,7 +56,7 @@ pub fn sell_fctr_tokens(ctx: Context<SellFctrTokens>) -> Result<()> {
         },
         signer,
     );
-    ctx.accounts.user.total_fctr_amount = 0;
+    ctx.accounts.user.user_fctr_amount = 0;
     ctx.accounts.platform.fctr_token_total_amount -= ctx.accounts.fctr_vault.amount;
     token::burn(cpi_ctx, ctx.accounts.fctr_vault.amount)?;
 

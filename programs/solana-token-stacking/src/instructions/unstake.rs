@@ -39,7 +39,9 @@ pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result
     if !ctx.accounts.receipt.is_valid {
         return err!(CustomErrors::InvalidReceipt);
     }
-    if ctx.accounts.platform.round_start < ctx.accounts.receipt.stake_ts {
+    if ctx.accounts.receipt.stake_ts > ctx.accounts.platform.round_start
+        && now < ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration
+    {
         return err!(CustomErrors::RoundStillGoing);
     }
 
@@ -87,6 +89,7 @@ pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result
     }
 
     let total_reward = calculate_reward(&grantors_accounts, &ctx);
+    msg!("Total reward: {}", total_reward);
     let total_granted_fctr = return_fctr(&grantors_accounts, &ctx)?;
     mint_reward(&grantors_accounts, &ctx, total_reward, total_granted_fctr)?;
 
@@ -117,7 +120,7 @@ fn calculate_reward<'info>(
                     .round() as u64;
                 AprReward::apply(reward_amount.apr - 0.02, reward_amount.reward + g_reward)
             });
-    reward.reward
+    reward.reward + (ctx.accounts.receipt.amount_deposited as f64 * apr) as u64
 }
 
 fn return_fctr<'info>(
@@ -133,7 +136,7 @@ fn return_fctr<'info>(
                 Transfer {
                     from: ctx.accounts.platform_fctr_token_vault.to_account_info(),
                     to: g.fctr_vault.to_account_info(),
-                    authority: ctx.accounts.authority.to_account_info(),
+                    authority: ctx.accounts.platform.to_account_info(),
                 },
                 signer,
             );
@@ -146,7 +149,7 @@ fn return_fctr<'info>(
         Transfer {
             from: ctx.accounts.platform_fctr_token_vault.to_account_info(),
             to: ctx.accounts.fctr_vault.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info(),
+            authority: ctx.accounts.platform.to_account_info(),
         },
         signer,
     );

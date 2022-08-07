@@ -131,3 +131,51 @@ export async function stake(
         .signers([userAuthority])
         .rpc();
 }
+
+export async function unstake(
+    ctx: Context,
+    userAuthority: Keypair
+): Promise<void> {
+    const remainingAccounts = [];
+    const receipt = await ctx.program.account.receipt.fetch(
+        await ctx.receipt(userAuthority.publicKey)
+    );
+    const grantors = receipt.grantors;
+    for (let i = 0; i < grantors.length; i++) {
+        remainingAccounts.push(
+            {
+                pubkey: grantors[i].grantor,
+                isSigner: false,
+                isWritable: true,
+            },
+            {
+                pubkey: await ctx.fctrATA(grantors[i].grantor),
+                isSigner: false,
+                isWritable: true,
+            },
+            {
+                pubkey: await ctx.bcdevATA(grantors[i].grantor),
+                isSigner: false,
+                isWritable: true,
+            }
+        );
+    }
+
+    await ctx.program.methods
+        .unstake()
+        .accounts({
+            receipt: await ctx.receipt(userAuthority.publicKey),
+            user: await ctx.user(userAuthority.publicKey),
+            authority: userAuthority.publicKey,
+            fctrVault: await ctx.userFctrVault(userAuthority.publicKey),
+            bcdevVault: await ctx.userBcdevVault(userAuthority.publicKey),
+            platform: ctx.platform,
+            platformFctrTokenVault: await ctx.fctrVault(),
+            bcdevMint: ctx.bcdevMint,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID
+        })
+        .remainingAccounts(remainingAccounts)
+        .signers([userAuthority])
+        .rpc();
+}
