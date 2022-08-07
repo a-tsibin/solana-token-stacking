@@ -13,7 +13,7 @@ use anchor_spl::token::{Burn, Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
 pub struct SellFctrTokens<'info> {
-    #[account(seeds = [b"user", authority.key().as_ref()], bump = user.bump)]
+    #[account(mut, seeds = [b"user", authority.key().as_ref()], bump = user.bump)]
     user: Account<'info, User>,
     #[account(mut, seeds = [b"fctr_vault", authority.key().as_ref()], bump = user.bump_fctr_vault)]
     fctr_vault: Account<'info, TokenAccount>,

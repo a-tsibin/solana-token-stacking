@@ -4,7 +4,7 @@ import chaiAsPromised from "chai-as-promised";
 import {Context} from "./ctx";
 import {
     addLiquidity, buyTokens,
-    initialize, registerUser, stake, startRound, unstake
+    initialize, registerUser, sellBcdevTokens, sellFctrTokens, stake, startRound, unstake
 } from "./token-stacking-api";
 import {transfer} from "./token";
 import {sleep} from "./utils";
@@ -129,5 +129,29 @@ describe("token-stacking", () => {
 
         const platform = await ctx.program.account.platform.fetch(ctx.platform);
         expect(platform.bcdevTokenTotalAmount.toNumber()).to.eql(userBcdevAmount)
+    });
+
+    it("Sell tokens", async () => {
+        const userFctrAmountBefore = await (await ctx.userFctrVault(ctx.users[0].publicKey)).amount(ctx);
+        const userBcdevAmountBefore = await (await ctx.userBcdevVault(ctx.users[0].publicKey)).amount(ctx);
+        let platform = await ctx.program.account.platform.fetch(ctx.platform);
+        const platformFctrAmountBefore = platform.fctrTokenTotalAmount;
+        const platformBcdevAmountBefore = platform.bcdevTokenTotalAmount;
+
+        await sellFctrTokens(ctx, ctx.users[0]);
+        await sellBcdevTokens(ctx, userBcdevAmountBefore, ctx.users[0]);
+
+        const user = await ctx.program.account.user.fetch(
+            await ctx.user(ctx.users[0].publicKey)
+        );
+        expect(user.userFctrAmount.toNumber()).to.eql(0);
+        const userFtcrAmount = await (await ctx.userFctrVault(user.authority)).amount(ctx);
+        expect(userFtcrAmount).to.eql(0);
+        const userBcdevAmount = await (await ctx.userBcdevVault(user.authority)).amount(ctx);
+        expect(userBcdevAmount).to.eql(0);
+
+        platform = await ctx.program.account.platform.fetch(ctx.platform);
+        expect(platform.fctrTokenTotalAmount.toNumber()).to.eql(platformFctrAmountBefore.toNumber() - userFctrAmountBefore);
+        expect(platform.bcdevTokenTotalAmount.toNumber()).to.eql(platformBcdevAmountBefore.toNumber() - userBcdevAmountBefore);
     });
 });

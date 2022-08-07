@@ -20,7 +20,7 @@ pub struct RegisterUser<'info> {
         payer = authority,
         seeds = [b"fctr_vault", authority.key().as_ref()],
         bump,
-        token::authority = authority,
+        token::authority = platform,
         token::mint = fctr_mint,
     )]
     fctr_vault: Account<'info, TokenAccount>,
@@ -29,7 +29,7 @@ pub struct RegisterUser<'info> {
         payer = authority,
         seeds = [b"bcdev_vault", authority.key().as_ref()],
         bump,
-        token::authority = authority,
+        token::authority = platform,
         token::mint = bcdev_mint,
     )]
     bcdev_vault: Account<'info, TokenAccount>,

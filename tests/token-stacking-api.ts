@@ -97,6 +97,47 @@ export async function buyTokens(
         .rpc();
 }
 
+export async function sellFctrTokens(
+    ctx: Context,
+    userAuthority: Keypair,
+): Promise<void> {
+    await ctx.program.methods
+        .sellFctrTokens()
+        .accounts({
+            user: await ctx.user(userAuthority.publicKey),
+            fctrVault: await ctx.userFctrVault(userAuthority.publicKey),
+            solVault: ctx.solVault,
+            platform: ctx.platform,
+            fctrMint: ctx.fctrMint,
+            authority: userAuthority.publicKey,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID
+        })
+        .signers([userAuthority])
+        .rpc();
+}
+
+export async function sellBcdevTokens(
+    ctx: Context,
+    amount: number,
+    userAuthority: Keypair,
+): Promise<void> {
+    await ctx.program.methods
+        .sellBcdevTokens(new BN(amount))
+        .accounts({
+            user: await ctx.user(userAuthority.publicKey),
+            bcdevVault: await ctx.userBcdevVault(userAuthority.publicKey),
+            solVault: ctx.solVault,
+            platform: ctx.platform,
+            bcdevMint: ctx.bcdevMint,
+            authority: userAuthority.publicKey,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID
+        })
+        .signers([userAuthority])
+        .rpc();
+}
+
 export async function startRound(
     ctx: Context,
     isFinal: boolean

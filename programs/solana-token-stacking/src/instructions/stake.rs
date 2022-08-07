@@ -40,13 +40,15 @@ pub fn stake(ctx: Context<Stake>) -> Result<()> {
     ctx.accounts.receipt.grantors = ctx.accounts.receipt.next_round_grantors.clone(); //std::mem::swap?
     ctx.accounts.receipt.next_round_grantors = Vec::new();
 
-    let cpi_ctx = CpiContext::new(
+    let signer: &[&[&[u8]]] = &[&[b"platform", &[ctx.accounts.platform.bump]]];
+    let cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
         Transfer {
             from: ctx.accounts.fctr_vault.to_account_info(),
             to: ctx.accounts.platform_fctr_token_vault.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info(),
+            authority: ctx.accounts.platform.to_account_info(),
         },
+        signer,
     );
     token::transfer(cpi_ctx, ctx.accounts.user.user_fctr_amount)?;
 
