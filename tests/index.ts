@@ -126,5 +126,8 @@ describe("token-stacking", () => {
 
         const userBcdevAmount = await (await ctx.userBcdevVault(ctx.users[0].publicKey)).amount(ctx);
         expect(userBcdevAmount).to.gt(0);
+
+        const platform = await ctx.program.account.platform.fetch(ctx.platform);
+        expect(platform.bcdevTokenTotalAmount.toNumber()).to.eql(userBcdevAmount)
     });
 });

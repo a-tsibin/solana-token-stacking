@@ -89,10 +89,10 @@ pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result
     }
 
     let total_reward = calculate_reward(&grantors_accounts, &ctx);
-    msg!("Total reward: {}", total_reward);
     let total_granted_fctr = return_fctr(&grantors_accounts, &ctx)?;
     mint_reward(&grantors_accounts, &ctx, total_reward, total_granted_fctr)?;
 
+    ctx.accounts.platform.bcdev_token_total_amount += total_reward;
     ctx.accounts.receipt.is_valid = false;
     ctx.accounts.receipt.grantors.clear();
     ctx.accounts
