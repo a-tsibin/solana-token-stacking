@@ -78,13 +78,15 @@ pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
     ctx.accounts.receipt.apr =
         ctx.accounts.receipt.apr * ctx.accounts.fctr_vault.amount as f64 / amount as f64;
 
-    let cpi_ctx = CpiContext::new(
+    let signer: &[&[&[u8]]] = &[&[b"platform", &[ctx.accounts.platform.bump]]];
+    let cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
         Transfer {
             from: ctx.accounts.fctr_vault.to_account_info(),
             to: ctx.accounts.platform_fctr_token_vault.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info(),
+            authority: ctx.accounts.platform.to_account_info(),
         },
+        signer,
     );
     token::transfer(cpi_ctx, amount)?;
 
