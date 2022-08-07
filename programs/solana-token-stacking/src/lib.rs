@@ -61,4 +61,8 @@ pub mod solana_token_stacking {
     pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result<()> {
         unstake::unstake(ctx)
     }
+
+    pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
+        grant_tokens::grant_tokens(ctx, amount)
+    }
 }
