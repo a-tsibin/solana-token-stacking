@@ -29,7 +29,7 @@ export class Context {
         this.platformAuthority = new Keypair();
 
         this.users = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 6; i++) {
             this.users.push(new Keypair());
         }
     }
@@ -66,6 +66,11 @@ export class Context {
             [Buffer.from("user"), userAuthority.toBuffer()],
             this.program.programId
         );
+    }
+
+    async userAcc(userAuthority: PublicKey) {
+        const pda = await this.user(userAuthority);
+        return await this.program.account.user.fetch(pda);
     }
 
     async fctrVault(): Promise<TokenAccount> {
@@ -108,6 +113,11 @@ export class Context {
         );
     }
 
+    async receiptAcc(authority: PublicKey) {
+        const pda = await this.receipt(authority);
+        return await this.program.account.receipt.fetch(pda);
+    }
+
     async fctrATA(owner: PublicKey): Promise<TokenAccount> {
         return await findATA(this, owner, this.fctrMint);
     }
@@ -118,5 +128,9 @@ export class Context {
 
     async solVaultBalance() {
         return (await this.connection.getBalance(this.solVault)) - 890880;
+    }
+
+    async platformAcc() {
+        return await this.program.account.platform.fetch(this.platform);
     }
 }

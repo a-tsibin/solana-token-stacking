@@ -32,6 +32,7 @@ pub struct Unstake<'info> {
 }
 
 pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result<()> {
+    msg!("Unstake");
     let now: u64 = Clock::get()?.unix_timestamp as _;
     if ctx.accounts.receipt.authority != ctx.accounts.authority.key() {
         return err!(CustomErrors::InvalidReceiptAuthority);
@@ -82,9 +83,7 @@ pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result
         .sorted_by(|a, b| a.grant_duration.cmp(&b.grant_duration))
         .collect::<Vec<GrantorsToReward>>();
 
-    if (ctx.accounts.receipt.grantors.len() != 0)
-        || (grantors_accounts.len() != ctx.accounts.receipt.grantors.len())
-    {
+    if grantors_accounts.len() != ctx.accounts.receipt.grantors.len() {
         return err!(CustomErrors::InvalidGrantorsList);
     }
 

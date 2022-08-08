@@ -55,7 +55,8 @@ pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
         .iter()
         .any(|g| g.grantor == ctx.accounts.fctr_vault.key())
         || grantors_list.len() >= 4
-        || (0.5 <= amount_ratio && amount_ratio <= 2.0)
+        || amount_ratio < 0.5
+        || 2.0 < amount_ratio
     {
         return err!(CustomErrors::TokenGrantError);
     }
@@ -75,8 +76,8 @@ pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
         return err!(CustomErrors::GrantCooldown);
     }
 
-    ctx.accounts.receipt.apr =
-        ctx.accounts.receipt.apr * ctx.accounts.fctr_vault.amount as f64 / amount as f64;
+    ctx.accounts.receipt.apr = ctx.accounts.receipt.apr * ctx.accounts.fctr_vault.amount as f64
+        / (ctx.accounts.fctr_vault.amount - amount) as f64;
 
     let signer: &[&[&[u8]]] = &[&[b"platform", &[ctx.accounts.platform.bump]]];
     let cpi_ctx = CpiContext::new_with_signer(

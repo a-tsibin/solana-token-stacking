@@ -78,11 +78,11 @@ export async function addLiquidity(
 
 export async function buyTokens(
     ctx: Context,
-    fctrToBuy: number,
+    lamports: number,
     userAuthority: Keypair,
 ): Promise<void> {
     await ctx.program.methods
-        .buyTokens(new BN(fctrToBuy))
+        .buyTokens(new BN(lamports))
         .accounts({
             user: await ctx.user(userAuthority.publicKey),
             fctrVault: await ctx.userFctrVault(userAuthority.publicKey),
@@ -182,20 +182,20 @@ export async function unstake(
         await ctx.receipt(userAuthority.publicKey)
     );
     const grantors = receipt.grantors;
-    for (let i = 0; i < grantors.length; i++) {
+    for (let i = 1; i <= grantors.length; i++) {
         remainingAccounts.push(
             {
-                pubkey: grantors[i].grantor,
+                pubkey: ctx.users[i].publicKey,
                 isSigner: false,
                 isWritable: true,
             },
             {
-                pubkey: await ctx.fctrATA(grantors[i].grantor),
+                pubkey: await ctx.userFctrVault(ctx.users[i].publicKey),//await ctx.fctrATA(ctx.users[i].publicKey),
                 isSigner: false,
                 isWritable: true,
             },
             {
-                pubkey: await ctx.bcdevATA(grantors[i].grantor),
+                pubkey: await ctx.userBcdevVault(ctx.users[i].publicKey),//await ctx.bcdevATA(ctx.users[i].publicKey),
                 isSigner: false,
                 isWritable: true,
             }

@@ -57,7 +57,6 @@ pub fn stake(ctx: Context<Stake>) -> Result<()> {
     ctx.accounts.receipt.stake_duration =
         ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration - now;
     ctx.accounts.receipt.amount_deposited = ctx.accounts.user.user_fctr_amount;
-    ctx.accounts.receipt.grantors = Vec::new();
 
     emit!(StakeEvent {
         amount: ctx.accounts.fctr_vault.amount
