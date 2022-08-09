@@ -32,7 +32,6 @@ pub struct Unstake<'info> {
 }
 
 pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result<()> {
-    msg!("Unstake");
     let now: u64 = Clock::get()?.unix_timestamp as _;
     if ctx.accounts.receipt.authority != ctx.accounts.authority.key() {
         return err!(CustomErrors::InvalidReceiptAuthority);
@@ -40,8 +39,8 @@ pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result
     if !ctx.accounts.receipt.is_valid {
         return err!(CustomErrors::InvalidReceipt);
     }
-    if ctx.accounts.receipt.stake_ts > ctx.accounts.platform.round_start
-        && now < ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration
+    if ctx.accounts.receipt.stake_ts >= ctx.accounts.platform.round_start
+        && now <= ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration
     {
         return err!(CustomErrors::RoundStillGoing);
     }
@@ -63,7 +62,7 @@ pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result
                 .receipt
                 .grantors
                 .iter()
-                .find(|g| g.grantor == grantor_user.authority)
+                .find(|g| g.grantor == grantor_user.key())
                 .ok_or(CustomErrors::InvalidGrantorsList)?;
             let grantor = GrantorsToReward {
                 user: grantor_user,
@@ -167,14 +166,15 @@ fn mint_reward<'info>(
 ) -> Result<()> {
     let signer: &[&[&[u8]]] = &[&[b"platform", &[ctx.accounts.platform.bump]]];
     if grantors_to_reward.len() != 0 {
-        let grantors_reward = total_reward - total_reward / 2;
+        let grantors_reward = total_reward / 2;
         let staker_reward = total_reward - grantors_reward;
         mint_bcdev(staker_reward, &ctx.accounts.bcdev_vault, ctx, signer)?;
 
         grantors_to_reward
             .iter()
             .map(|g| {
-                let share = grantors_reward * g.grant_amount / total_granted_fctr;
+                let share = (grantors_reward as f64 * g.grant_amount as f64
+                    / total_granted_fctr as f64) as u64;
                 mint_bcdev(share, &g.bcdev_vault, ctx, signer)
             })
             .collect::<Result<Vec<_>>>()?;

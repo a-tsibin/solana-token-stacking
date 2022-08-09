@@ -43,6 +43,11 @@ pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
     if !ctx.accounts.confidant_user.grant_program || !ctx.accounts.user.grant_program {
         return err!(CustomErrors::GrantProgramError);
     }
+    let grant_duration = if ctx.accounts.confidant_receipt.stake_ts > now {
+        ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration - now
+    } else {
+        ctx.accounts.platform.round_duration
+    };
     let grantors_list = if ctx.accounts.confidant_receipt.stake_ts > now {
         &mut ctx.accounts.confidant_receipt.grantors
     } else {
@@ -62,8 +67,7 @@ pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
     }
     grantors_list.push(GrantorRecord {
         amount,
-        grant_duration: ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration
-            - now,
+        grant_duration,
         grantor: ctx.accounts.user.key(),
     });
     if ctx
@@ -91,7 +95,6 @@ pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
     );
     token::transfer(cpi_ctx, amount)?;
 
-    ctx.accounts.confidant_receipt.amount_deposited += amount;
     ctx.accounts
         .confidant_receipt
         .grantors_history

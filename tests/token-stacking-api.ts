@@ -185,17 +185,17 @@ export async function unstake(
     for (let i = 1; i <= grantors.length; i++) {
         remainingAccounts.push(
             {
-                pubkey: ctx.users[i].publicKey,
+                pubkey: await ctx.user(ctx.users[i].publicKey),
                 isSigner: false,
                 isWritable: true,
             },
             {
-                pubkey: await ctx.userFctrVault(ctx.users[i].publicKey),//await ctx.fctrATA(ctx.users[i].publicKey),
+                pubkey: await ctx.userFctrVault(ctx.users[i].publicKey),
                 isSigner: false,
                 isWritable: true,
             },
             {
-                pubkey: await ctx.userBcdevVault(ctx.users[i].publicKey),//await ctx.bcdevATA(ctx.users[i].publicKey),
+                pubkey: await ctx.userBcdevVault(ctx.users[i].publicKey),
                 isSigner: false,
                 isWritable: true,
             }
@@ -260,5 +260,29 @@ export async function withdraw(
             systemProgram: SystemProgram.programId
         })
         .signers([platformAuthority])
+        .rpc();
+}
+
+export async function claimTokens(
+    ctx: Context,
+    confidantUser: PublicKey,
+    userAuthority: Keypair
+): Promise<void> {
+    await ctx.program.methods
+        .claimTokens()
+        .accounts({
+            receipt: await ctx.receipt(userAuthority.publicKey),
+            user: await ctx.user(userAuthority.publicKey),
+            fctrVault: await ctx.userFctrVault(userAuthority.publicKey),
+            authority: userAuthority.publicKey,
+            confidantUser: await ctx.user(confidantUser),
+            confidantReceipt: await ctx.receipt(confidantUser),
+            confidantAuthority: confidantUser,
+            platform: ctx.platform,
+            platformFctrTokenVault: await ctx.fctrVault(),
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID
+        })
+        .signers([userAuthority])
         .rpc();
 }

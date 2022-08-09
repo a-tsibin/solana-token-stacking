@@ -65,4 +65,8 @@ pub mod solana_token_stacking {
     pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
         grant_tokens::grant_tokens(ctx, amount)
     }
+
+    pub fn claim_tokens(ctx: Context<ClaimTokens>) -> Result<()> {
+        claim_tokens::claim_tokens(ctx)
+    }
 }

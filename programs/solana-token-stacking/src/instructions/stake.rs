@@ -56,7 +56,13 @@ pub fn stake(ctx: Context<Stake>) -> Result<()> {
     ctx.accounts.receipt.stake_ts = now;
     ctx.accounts.receipt.stake_duration =
         ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration - now;
-    ctx.accounts.receipt.amount_deposited = ctx.accounts.user.user_fctr_amount;
+    ctx.accounts.receipt.amount_deposited = ctx.accounts.user.user_fctr_amount
+        + ctx
+            .accounts
+            .receipt
+            .grantors
+            .iter()
+            .fold(0, |sum, g| sum + g.amount);
 
     emit!(StakeEvent {
         amount: ctx.accounts.fctr_vault.amount

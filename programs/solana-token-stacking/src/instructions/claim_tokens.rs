@@ -26,7 +26,7 @@ pub struct ClaimTokens<'info> {
     /// CHECK:
     confidant_authority: UncheckedAccount<'info>,
     #[account(mut, seeds = [b"platform"], bump = platform.bump)]
-    platform: Account<'info, Platform>,
+    platform: Box<Account<'info, Platform>>,
     #[account(mut, seeds = [b"fctr_token_vault"], bump = platform.bump_fctr_token_vault)]
     platform_fctr_token_vault: Account<'info, TokenAccount>,
     system_program: Program<'info, System>,
@@ -59,7 +59,7 @@ pub fn claim_tokens(ctx: Context<ClaimTokens>) -> Result<()> {
         Transfer {
             from: ctx.accounts.platform_fctr_token_vault.to_account_info(),
             to: ctx.accounts.fctr_vault.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info(),
+            authority: ctx.accounts.platform.to_account_info(),
         },
         signer,
     );

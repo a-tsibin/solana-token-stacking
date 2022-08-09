@@ -3,7 +3,7 @@ import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import {Context} from "./ctx";
 import {
-    addLiquidity, buyTokens, grantTokens,
+    addLiquidity, buyTokens, claimTokens, grantTokens,
     initialize, registerUser, sellBcdevTokens, sellFctrTokens, stake, startRound, unstake, withdraw
 } from "./token-stacking-api";
 import {transfer} from "./token";
@@ -20,7 +20,7 @@ before(async () => {
 
 describe("token-stacking", () => {
     it("Initialize", async () => {
-        const roundDuration = 2;
+        const roundDuration = 3;
         const registrationPrice = 100_000;
         await initialize(ctx, roundDuration, registrationPrice);
 
@@ -103,7 +103,9 @@ describe("token-stacking", () => {
         const userFtcrAmountWhileStake = await (await ctx.userFctrVault(user.authority)).amount(ctx);
         expect(userFtcrAmountWhileStake).to.eql(0);
 
-        await sleep(2100);
+        await expect(unstake(ctx, ctx.users[0])).to.be.rejected;
+
+        await sleep(4000);
 
         await unstake(ctx, ctx.users[0]);
 
@@ -113,7 +115,7 @@ describe("token-stacking", () => {
         const userBcdevAmount = await (await ctx.userBcdevVault(ctx.users[0].publicKey)).amount(ctx);
         expect(userBcdevAmount).to.gt(0);
 
-        const platform = await ctx.program.account.platform.fetch(ctx.platform);
+        const platform = await ctx.platformAcc();
         expect(platform.bcdevTokenTotalAmount.toNumber()).to.eql(userBcdevAmount)
     });
 
@@ -185,16 +187,69 @@ describe("token-stacking", () => {
         await expect(grantTokens(ctx, 50_000, ctx.users[0].publicKey, ctx.users[5])).to.be.rejected;
     });
 
-    it("Stake tokens with grantors", async () => {
+    it("Stake tokens with grantors(before round)", async () => {
+        const bcdevAmountBefore = (await ctx.platformAcc()).bcdevTokenTotalAmount.toNumber();
         await startRound(ctx, false);
         await stake(ctx, ctx.users[0]);
 
-        const receipt = await ctx.receiptAcc(ctx.users[0].publicKey);
+        let receipt = await ctx.receiptAcc(ctx.users[0].publicKey);
         expect(receipt.nextRoundGrantors.length).to.eql(0);
         expect(receipt.grantors.length).to.eql(4);
 
-        await sleep(2100);
+        await claimTokens(ctx, ctx.users[0].publicKey, ctx.users[4]);
+        receipt = await ctx.receiptAcc(ctx.users[0].publicKey);
+        expect(receipt.nextRoundGrantors.length).to.eql(0);
+        expect(receipt.grantors.length).to.eql(3);
+
+        await sleep(4000);
 
         await unstake(ctx, ctx.users[0]);
+
+        const bcdevAmountAfter = (await ctx.platformAcc()).bcdevTokenTotalAmount.toNumber();
+        const reward = bcdevAmountAfter - bcdevAmountBefore;
+
+        const confidantBcdev = await (await ctx.userBcdevVault(ctx.users[0].publicKey)).amount(ctx);
+        expect(Math.abs((reward / 2) - confidantBcdev)).to.lt(1);
+
+        const grantorReward = reward / (2 * 3);
+        for (let i = 1; i < 4; i++) {
+            const user = await ctx.userAcc(ctx.users[i].publicKey);
+            const userFctrAmount = await (await ctx.userFctrVault(ctx.users[i].publicKey)).amount(ctx);
+            expect(userFctrAmount).to.eql(user.userFctrAmount.toNumber());
+            const userBcdevAmount = await (await ctx.userBcdevVault(ctx.users[i].publicKey)).amount(ctx);
+            expect(Math.abs(grantorReward - userBcdevAmount)).to.lt(1);
+        }
+    });
+
+    it("Stake tokens with grantors(while round is started)", async () => {
+        const bcdevAmountBefore = (await ctx.platformAcc()).bcdevTokenTotalAmount.toNumber();
+        const grantorFtcrAmountBefore = await (await ctx.userFctrVault(ctx.users[2].publicKey)).amount(ctx);
+        const grantAmount = grantorFtcrAmountBefore / 2;
+
+        await startRound(ctx, true);
+        await stake(ctx, ctx.users[0]);
+
+        await grantTokens(ctx, grantAmount, ctx.users[0].publicKey, ctx.users[1]);
+        let receipt = await ctx.receiptAcc(ctx.users[0].publicKey);
+        expect(receipt.grantors.length).to.eql(1);
+
+        await sleep(1000);
+        await grantTokens(ctx, grantAmount, ctx.users[0].publicKey, ctx.users[2]);
+        receipt = await ctx.receiptAcc(ctx.users[0].publicKey);
+        expect(receipt.grantors.length).to.eql(2);
+
+        await sleep(3000);
+
+        await unstake(ctx, ctx.users[0]);
+
+        const bcdevAmountAfter = (await ctx.platformAcc()).bcdevTokenTotalAmount.toNumber();
+        const reward = bcdevAmountAfter - bcdevAmountBefore;
+
+        const confidantBcdev = await (await ctx.userBcdevVault(ctx.users[0].publicKey)).amount(ctx);
+        expect(Math.abs((reward / 2) - confidantBcdev)).to.lt(1);
+
+        const user1BcdevAmount = await (await ctx.userBcdevVault(ctx.users[1].publicKey)).amount(ctx);
+        const user2BcdevAmount = await (await ctx.userBcdevVault(ctx.users[2].publicKey)).amount(ctx);
+        expect(user1BcdevAmount).to.gt(user2BcdevAmount);
     });
 });
