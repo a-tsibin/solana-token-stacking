@@ -166,8 +166,8 @@ fn mint_reward<'info>(
 ) -> Result<()> {
     let signer: &[&[&[u8]]] = &[&[b"platform", &[ctx.accounts.platform.bump]]];
     if grantors_to_reward.len() != 0 {
-        let grantors_reward = total_reward / 2;
-        let staker_reward = total_reward - grantors_reward;
+        let staker_reward = total_reward / 2;
+        let grantors_reward = total_reward - staker_reward;
         mint_bcdev(staker_reward, &ctx.accounts.bcdev_vault, ctx, signer)?;
 
         grantors_to_reward

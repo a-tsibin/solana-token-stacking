@@ -10,6 +10,7 @@ pub struct Receipt {
     pub is_valid: bool,
     pub stake_duration: u64,
     pub stake_ts: u64,
+    pub round_ends: u64,
     pub amount_deposited: u64,
     pub apr: f64,
     pub grantors: Vec<GrantorRecord>,
@@ -20,6 +21,7 @@ pub struct Receipt {
 
 impl Receipt {
     pub const SPACE: usize = 1
+        + 8
         + 8
         + 8
         + 8

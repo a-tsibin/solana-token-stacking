@@ -155,7 +155,7 @@ describe("token-stacking", () => {
         await buyTokens(ctx, 100_000, ctx.users[0]);
     });
 
-    it("Grant tokens", async () => {
+    it("Grant tokens before round", async () => {
         const platformFctrAmountBefore = await (await ctx.fctrVault()).amount(ctx);
         const lamports = 50_000;
         for (let i = 1; i < 5; i++) {
@@ -187,7 +187,7 @@ describe("token-stacking", () => {
         await expect(grantTokens(ctx, 50_000, ctx.users[0].publicKey, ctx.users[5])).to.be.rejected;
     });
 
-    it("Stake tokens with grantors(before round)", async () => {
+    it("Stake tokens with grantors", async () => {
         const bcdevAmountBefore = (await ctx.platformAcc()).bcdevTokenTotalAmount.toNumber();
         await startRound(ctx, false);
         await stake(ctx, ctx.users[0]);
@@ -221,21 +221,24 @@ describe("token-stacking", () => {
         }
     });
 
-    it("Stake tokens with grantors(while round is started)", async () => {
+    it("Grant tokens and stake while round is started", async () => {
         const bcdevAmountBefore = (await ctx.platformAcc()).bcdevTokenTotalAmount.toNumber();
         const grantorFtcrAmountBefore = await (await ctx.userFctrVault(ctx.users[2].publicKey)).amount(ctx);
         const grantAmount = grantorFtcrAmountBefore / 2;
+        const confidantBcdevBefore = await (await ctx.userBcdevVault(ctx.users[0].publicKey)).amount(ctx);
 
         await startRound(ctx, true);
         await stake(ctx, ctx.users[0]);
 
         await grantTokens(ctx, grantAmount, ctx.users[0].publicKey, ctx.users[1]);
         let receipt = await ctx.receiptAcc(ctx.users[0].publicKey);
+        expect(receipt.nextRoundGrantors.length).to.eql(0);
         expect(receipt.grantors.length).to.eql(1);
 
-        await sleep(1000);
-        await grantTokens(ctx, grantAmount, ctx.users[0].publicKey, ctx.users[2]);
+        await sleep(500);
+        await grantTokens(ctx, grantAmount / 2, ctx.users[0].publicKey, ctx.users[2]);
         receipt = await ctx.receiptAcc(ctx.users[0].publicKey);
+        expect(receipt.nextRoundGrantors.length).to.eql(0);
         expect(receipt.grantors.length).to.eql(2);
 
         await sleep(3000);
@@ -246,7 +249,7 @@ describe("token-stacking", () => {
         const reward = bcdevAmountAfter - bcdevAmountBefore;
 
         const confidantBcdev = await (await ctx.userBcdevVault(ctx.users[0].publicKey)).amount(ctx);
-        expect(Math.abs((reward / 2) - confidantBcdev)).to.lt(1);
+        expect(Math.abs((reward / 2) - confidantBcdev + confidantBcdevBefore)).to.lte(1);
 
         const user1BcdevAmount = await (await ctx.userBcdevVault(ctx.users[1].publicKey)).amount(ctx);
         const user2BcdevAmount = await (await ctx.userBcdevVault(ctx.users[2].publicKey)).amount(ctx);

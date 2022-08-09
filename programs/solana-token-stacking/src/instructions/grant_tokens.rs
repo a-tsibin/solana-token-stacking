@@ -48,7 +48,15 @@ pub fn grant_tokens(ctx: Context<GrantTokens>, amount: u64) -> Result<()> {
     } else {
         ctx.accounts.platform.round_duration
     };
-    let grantors_list = if ctx.accounts.confidant_receipt.stake_ts > now {
+
+    msg!(
+        "Stake: {}. Start: {}. End: {}. Now: {}",
+        ctx.accounts.confidant_receipt.stake_ts,
+        ctx.accounts.platform.round_start,
+        ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration,
+        now
+    );
+    let grantors_list = if ctx.accounts.confidant_receipt.round_ends > now {
         &mut ctx.accounts.confidant_receipt.grantors
     } else {
         &mut ctx.accounts.confidant_receipt.next_round_grantors

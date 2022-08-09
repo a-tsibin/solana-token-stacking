@@ -52,6 +52,7 @@ pub fn claim_tokens(ctx: Context<ClaimTokens>) -> Result<()> {
         .confidant_receipt
         .grantors
         .retain(|g| g.grantor != ctx.accounts.user.key());
+    ctx.accounts.confidant_receipt.amount_deposited -= granted_amount;
 
     let signer: &[&[&[u8]]] = &[&[b"platform", &[ctx.accounts.platform.bump]]];
     let cpi_ctx = CpiContext::new_with_signer(

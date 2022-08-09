@@ -54,6 +54,8 @@ pub fn stake(ctx: Context<Stake>) -> Result<()> {
 
     ctx.accounts.receipt.is_valid = true;
     ctx.accounts.receipt.stake_ts = now;
+    ctx.accounts.receipt.round_ends =
+        ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration;
     ctx.accounts.receipt.stake_duration =
         ctx.accounts.platform.round_start + ctx.accounts.platform.round_duration - now;
     ctx.accounts.receipt.amount_deposited = ctx.accounts.user.user_fctr_amount
